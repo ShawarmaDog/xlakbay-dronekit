@@ -1,13 +1,9 @@
-#Scripts were forked from Dronedojo's pidronescripts directory and then modified for our use case.
-#Adapted from: https://github.com/dronedojo/pidronescripts/tree/master# 
-#On: May 6, 2025
-
 ##########DEPENDENCIES#############
 
 from dronekit import connect, VehicleMode,LocationGlobalRelative,APIException
 import time
 import socket
-import exceptions
+#import exceptions
 import math
 import argparse
 

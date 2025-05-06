@@ -1,12 +1,9 @@
-#Scripts were forked from Dronedojo's pidronescripts directory and then modified for our use case.
-#Adapted from: https://github.com/dronedojo/pidronescripts/tree/master# 
-#On: May 6, 2025
 ##########DEPENDENCIES#############
 
 from dronekit import connect, VehicleMode,LocationGlobalRelative,APIException
 import time
 import socket
-import exceptions
+#import exceptions
 import math
 import argparse
 
@@ -71,22 +68,22 @@ def goto(targetLocation):
 	return None
 ##########MAIN EXECUTABLE###########
 
-wp1 = LocationGlobalRelative(36.00550,-95.86124,10)
-wp2 = LocationGlobalRelative(36.00607,-95.86107,10)
-wp3 = LocationGlobalRelative(36.00604,-95.86037,10)
+#wp1 = LocationGlobalRelative(14.576000208543087, 121.06365608876412,10)
+wp2 = LocationGlobalRelative(14.57598833, 121.06378540,10)
+wp3 = LocationGlobalRelative(14.57591648, 121.06378002,10)
 
 vehicle = connectMyCopter()
 
-vehicle.parameters['WP_SPEED']=2
+vehicle.parameters['WP_SPEED']=0.5 #speed in m/s
 
 arm()
 
 
-goto(wp1)
+#goto(wp1)
 goto(wp2)
 goto(wp3)
 
-vehicle.mode = VehicleMode("RTL")
+vehicle.mode = VehicleMode("RTL") #Return to Launch (Home icon on map)
 
 
 while vehicle.mode!='RTL':

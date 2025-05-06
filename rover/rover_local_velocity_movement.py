@@ -1,11 +1,8 @@
-#Scripts were forked from Dronedojo's pidronescripts directory and then modified for our use case.
-#Adapted from: https://github.com/dronedojo/pidronescripts/tree/master# 
-#On: May 6, 2025
 ##########DEPENDENCIES#############
 from dronekit import connect, VehicleMode,LocationGlobalRelative,APIException
 import time
 import socket
-import exceptions
+#import exceptions
 import math
 import argparse
 from pymavlink import mavutil
@@ -47,7 +44,7 @@ def arm():
 	return None
 
 ##Send a velocity command with +x being the heading of the drone.
-def send_local_ned_velocity(vx, vy, vz):
+def send_local_ned_velocity(vx, vy, vz): #ned = north,east,down (altitude)
 	msg = vehicle.message_factory.set_position_target_local_ned_encode(
 		0,
 		0, 0,
@@ -110,23 +107,28 @@ vehicle = connectMyCopter()
 arm()
 
 counter=0
-while counter < 5:
-        send_local_ned_velocity(1,0,0) 
-        print("Moving forward at 1 m/s with local NED")
+while counter < 5: #cannot send negative vx local vel
+        send_local_ned_velocity(0.5,0,0) 
+        print("Moving forward at 0.5 m/s with local NED")
         time.sleep(1)
         counter = counter + 1
 
 counter=0
-while counter < 5:
-        send_local_ned_velocity(1,1,0)
-        print("Turning to the right")
+while counter < 3:
+        send_local_ned_velocity(0.5,0.5,0)
+        print("Turning to the right (clockwise)")
         time.sleep(2)
-        send_local_ned_velocity(1,-1,0)
-        print("Turning to the left")
         counter = counter + 1
-
+        
 counter=0
-while counter < 5:
+while counter < 3:    
+        send_local_ned_velocity(0.5,-0.5,0)
+        print("Turning to the left (counter clockwise)")
+        time.sleep(2)
+        counter = counter + 1
+'''
+counter=0 #have to send global vel command every few secs so it doesnt stop
+while counter < 5: 
         send_global_ned_velocity(1,0,0)
         print("Moving TRUE NORTH")
         time.sleep(3)
@@ -140,5 +142,4 @@ while counter < 5:
         print("MOVING TRUE WEST")
         time.sleep(3)
         counter=5
-
-
+'''
