@@ -129,20 +129,4 @@ while counter < 3:
         print("Turning to the left (counter clockwise)")
         time.sleep(2)
         counter = counter + 1
-'''
-counter=0 #have to send global vel command every few secs so it doesnt stop
-while counter < 5: 
-        send_global_ned_velocity(1,0,0)
-        print("Moving TRUE NORTH")
-        time.sleep(3)
-        send_global_ned_velocity(-1,0,0)
-        print("MOVING TRUE SOUTH")
-        time.sleep(3)
-        send_global_ned_velocity(0,1,0)
-        print("MOVING TRUE EAST")
-        time.sleep(3)
-        send_global_ned_velocity(0,-1,0)
-        print("MOVING TRUE WEST")
-        time.sleep(3)
-        counter=5
-'''
+
