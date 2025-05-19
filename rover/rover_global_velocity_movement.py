@@ -1,3 +1,6 @@
+#Scripts were forked from Dronedojo's pidronescripts directory and then modified for our use case.
+#Adapted from: https://github.com/dronedojo/pidronescripts/tree/master# 
+#On: May 6, 2025
 ##########DEPENDENCIES#############
 from dronekit import connect, VehicleMode,LocationGlobalRelative,APIException
 import time
@@ -105,23 +108,7 @@ def backup(): ##rough function to easily reverse without needing to use a GPS na
 vehicle = connectMyCopter()
 
 arm()
-'''
-counter=0
-while counter < 5: #cannot send negative vx local vel
-        send_local_ned_velocity(1,0,0) 
-        print("Moving forward at 1 m/s with local NED")
-        time.sleep(1)
-        counter = counter + 1
 
-counter=0
-while counter < 5:
-        send_local_ned_velocity(1,1,0)
-        print("Turning to the right")
-        time.sleep(2)
-        send_local_ned_velocity(1,-1,0)
-        print("Turning to the left")
-        counter = counter + 1
-'''
 counter=0 #have to send global vel command every few secs so it doesnt stop
 while counter < 5: 
 	#Move true north
