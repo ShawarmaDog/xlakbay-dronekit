@@ -18,7 +18,7 @@ marker_size = 19  # cm
 aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_ARUCO_ORIGINAL)
 parameters = aruco.DetectorParameters_create()
 
-calib_path = "C:/Users/Bob/Desktop/CameraCalibration/calibrationFiles/"
+calib_path = "C:/Users/Bob/Desktop/xlakbay-dronekit/rover/camera/calibrationFiles/"
 cameraMatrix = np.loadtxt(calib_path + 'cameraMatrix.txt', delimiter=',')
 cameraDistortion = np.loadtxt(calib_path + 'cameraDistortion.txt', delimiter=',')
 #############################

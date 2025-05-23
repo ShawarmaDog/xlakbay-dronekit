@@ -2,11 +2,7 @@ import cv2
 import os
 
 # Define the path to save images
-desktop = os.path.join(os.path.expanduser("~"), "Desktop")
-images_folder = os.path.join(desktop, "images")
-
-# Create the folder if it doesn't exist
-os.makedirs(images_folder, exist_ok=True)
+images_folder = r"C:\Users\Bob\Desktop\xlakbay-dronekit\rover\camera\images"
 
 # Open the webcam
 cap = cv2.VideoCapture(0)
