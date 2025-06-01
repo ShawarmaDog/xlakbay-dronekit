@@ -8,8 +8,8 @@ images_folder = r"C:\Users\Bob\Desktop\xlakbay-dronekit\rover\camera\images"
 cap = cv2.VideoCapture(0)
 
 # Set the resolution to 640x480
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 print("Press 'f' to capture an image. Press 'q' to quit.")
 
