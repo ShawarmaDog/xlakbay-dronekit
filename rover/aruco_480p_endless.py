@@ -245,24 +245,32 @@ arm()
 
 success_counter = 0
 success_break_point = 5
+marker_not_detected_counter = 0  # Counter for marker not detected
+marker_not_detected_threshold = 20  # Threshold for stopping (1 second = 20 iterations at 0.05s sleep)
 
 try:
     while True:
         ret = park_at_aruco()
         if ret == -1:  # Marker not detected
-            send_local_ned_velocity(0, 0, 0)  # Stop the rover
-            vehicle.armed = False  # Disarm for safety
-            print("Waiting for marker detection >100cm away to rearm...")
-            
-            # Wait until marker is detected again at >100cm
-            while True:
-                _, _, z = get_aruco_coordinates()
-                if float(z) > 100:  # Marker detected again
-                    print("Marker detected. Rearming...")
-                    arm()  # Rearm the vehicle
-                    break  # Exit the waiting loop
-        
-        elif ret == 0:  # Rover successfully parked
+            marker_not_detected_counter += 1
+            if marker_not_detected_counter >= marker_not_detected_threshold:
+                print("Marker not detected for 1 second. Stopping and disarming the rover.")
+                send_local_ned_velocity(0, 0, 0)  # Stop the rover
+                vehicle.armed = False  # Disarm for safety
+                print("Waiting for marker detection >100cm away to rearm...")
+                
+                # Wait until marker is detected again at >100cm
+                while True:
+                    _, _, z = get_aruco_coordinates()
+                    if float(z) > 100:  # Marker detected again
+                        print("Marker detected. Rearming...")
+                        arm()  # Rearm the vehicle
+                        marker_not_detected_counter = 0  # Reset the counter
+                        break  # Exit the waiting loop
+        else:
+            marker_not_detected_counter = 0  # Reset the counter if marker is detected
+
+        if ret == 0:  # Rover successfully parked
             success_counter += 1
             print(f"Success counter: {success_counter}")
             
