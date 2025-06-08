@@ -180,63 +180,63 @@ def get_aruco_coordinates():
                 return x,y,z
 
 def park_at_aruco():
-        turn_angle_max=2 ##-2 to 2
-        speed_max=.5 #m/s
+        turn_angle_max = 2  # -2 to 2
+        speed_max = 0.5  # m/s
         
-        speed=0
-        turn_angle=0
-        turn_angle_sign=1 #either 1 or -1
+        speed = 0
+        turn_angle = 0
+        turn_angle_sign = 1  # either 1 or -1
 
-        P_TURN_GAIN=0
+        P_TURN_GAIN = 0
 
-        x,y,z=get_aruco_coordinates()
-        x=float(x)
-        y=float(y)
-        z=float(z)
+        x, y, z = get_aruco_coordinates()
+        x = float(x)
+        y = float(y)
+        z = float(z)
         if x == 0 and y == 0 and z == 0:
-                print("Marker not found. Exiting this iteration")
-                return None
+                print("Marker not found. Stopping the rover.")
+                return -1  # Return -1 to indicate marker not found
 
-        xm=x/100 #change default cm into m
-        zm=z/100
+        xm = x / 100  # change default cm into m
+        zm = z / 100
 
         if x > 0: 
-                turn_angle_sign=1
-            	#if the marker is to the right of the rover
-				#positive sign would make the rover turn right as well
+                turn_angle_sign = 1
+                # if the marker is to the right of the rover
+                # positive sign would make the rover turn right as well
         else:
-                turn_angle_sign=-1
-                #negative sign would make the rover turn left
+                turn_angle_sign = -1
+                # negative sign would make the rover turn left
         if z > 500:
-                P_TURN_GAIN=.061
-                #if far away we want the rover to be less sensitive in its turning
+                P_TURN_GAIN = 0.061
+                # if far away we want the rover to be less sensitive in its turning
         if z < 500:
-                P_TURN_GAIN=.125
-                #if near we want the rover to be more sensitive in its turning
+                P_TURN_GAIN = 0.125
+                # if near we want the rover to be more sensitive in its turning
 
-        turn_angle = abs(xm)*P_TURN_GAIN
+        turn_angle = abs(xm) * P_TURN_GAIN
         if turn_angle > turn_angle_max:
                 turn_angle = turn_angle_max
 
-        turn_angle = turn_angle*turn_angle_sign
+        turn_angle = turn_angle * turn_angle_sign
         
         if z > 200:
-                speed=speed_max
-                #farther than 2m, set speed to 0.5m/s
-        elif z>100 and z < 200:
-                speed=.3 
-                #between 1-2m, set speed to 0.3m/s
-        elif z<100:
-                speed=0
+                speed = speed_max
+                # farther than 2m, set speed to 0.5m/s
+        elif z > 100 and z < 200:
+                speed = 0.3 
+                # between 1-2m, set speed to 0.3m/s
+        elif z < 100:
+                speed = 0
                 print("COULD BE HOME")
-                send_local_ned_velocity(0,0,0)
-                #less than 1m, stop the rover
-                return 0 ##THIS INDICATES THE ROVER MADE IT
-       			
-        velocity_string="VELOCITY= "+str(speed)
+                send_local_ned_velocity(0, 0, 0)
+                # less than 1m, stop the rover
+                return 0  # THIS INDICATES THE ROVER MADE IT
+                   
+        velocity_string = "VELOCITY= " + str(speed)
         print(velocity_string)
-        send_local_ned_velocity(speed,turn_angle,0)
-        return None
+        send_local_ned_velocity(speed, turn_angle, 0)
+        return 1  # Return 1 to indicate normal operation
 ##########MAIN EXECUTABLE###########
 
 vehicle = connectMyCopter()
@@ -249,7 +249,20 @@ success_break_point = 5
 try:
     while True:
         ret = park_at_aruco()
-        if ret == 0:
+        if ret == -1:  # Marker not detected
+            send_local_ned_velocity(0, 0, 0)  # Stop the rover
+            vehicle.armed = False  # Disarm for safety
+            print("Waiting for marker detection >100cm away to rearm...")
+            
+            # Wait until marker is detected again at >100cm
+            while True:
+                _, _, z = get_aruco_coordinates()
+                if float(z) > 100:  # Marker detected again
+                    print("Marker detected. Rearming...")
+                    arm()  # Rearm the vehicle
+                    break  # Exit the waiting loop
+        
+        elif ret == 0:  # Rover successfully parked
             success_counter += 1
             print(f"Success counter: {success_counter}")
             
@@ -260,14 +273,14 @@ try:
                 success_counter = 0  # Reset the counter
                 print("Waiting for marker detection >100cm away to rearm...")
                 
-                #Until marker is detected again at >100cm, then rearm
+                # Wait until marker is detected again at >100cm
                 while True:
                     _, _, z = get_aruco_coordinates()
                     if float(z) > 100:  # Marker detected again
                         print("Marker detected. Rearming...")
                         arm()  # Rearm the vehicle
-                        break #Break goes back to first while loop
-                    
+                        break  # Exit the waiting loop
+        
         time.sleep(0.05)
         
 except KeyboardInterrupt:
