@@ -14,8 +14,8 @@ from pymavlink import mavutil
 
 ###################################
 
-width=1280
-height=720
+width=640
+height=480
 cap = WebcamVideoStream(src=0, height=height, width=width).start()
 
 ############ARUCO/CV2############
@@ -258,7 +258,7 @@ try:
                 send_local_ned_velocity(0, 0, 0)  # Stop the vehicle
                 vehicle.armed = False  # Disarm for safety
                 success_counter = 0  # Reset the counter
-                print("Waiting for marker detection to rearm...")
+                print("Waiting for marker detection >100cm away to rearm...")
                 
                 #Until marker is detected again at >100cm, then rearm
                 while True:

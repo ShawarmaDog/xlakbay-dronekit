@@ -7,8 +7,8 @@ import time
 
 #############################
 
-width = 1280
-height = 720
+width = 640
+height = 480
 cap = WebcamVideoStream(src=0, height=height, width=width).start()
 
 ############ARUCO/CV2############
