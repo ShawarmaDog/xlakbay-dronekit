@@ -253,7 +253,8 @@ try:
         ret = park_at_aruco()
         if ret == -1:  # Marker not detected
             marker_not_detected_counter += 1
-            if marker_not_detected_counter >= marker_not_detected_threshold:
+            if marker_not_detected_counter >= marker_not_detected_threshold: 
+                # Has to not detect marker for 1 second (20 * 0.05s)) before stopping
                 print("Marker not detected for 1 second. Stopping and disarming the rover.")
                 send_local_ned_velocity(0, 0, 0)  # Stop the rover
                 vehicle.armed = False  # Disarm for safety
