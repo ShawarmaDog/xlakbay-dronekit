@@ -7,12 +7,17 @@ import time
 import socket
 import math
 import argparse
+import csv
+import os
 from pymavlink import mavutil
 
 
 
-#########FUNCTIONS#################
 
+
+
+#########FUNCTIONS#################
+		
 def connectMyCopter():
 
 	parser = argparse.ArgumentParser(description='commands')
@@ -25,10 +30,10 @@ def connectMyCopter():
 	return vehicle
 
 def arm():
-	#while vehicle.is_armable!=True:
-		#print("Waiting for vehicle to become armable.")
-		#time.sleep(1)
-	#print("Vehicle is now armable")
+	while vehicle.is_armable!=True:
+		print("Waiting for vehicle to become armable.")
+		time.sleep(1)
+	print("Vehicle is now armable")
 
 	vehicle.mode = VehicleMode("GUIDED")
 
@@ -108,5 +113,18 @@ vehicle = connectMyCopter()
 
 arm()
 
-send_local_ned_velocity(0.5,0,0) 
-print("Moving forward at 0.5 m/s with local NED")
+send_local_ned_velocity(0,0.5,0) 
+print("Moving east at 0.5 m/s with local NED")
+time.sleep(3)
+
+send_local_ned_velocity(0,0,0)
+vehicle.armed = False
+print("Stopping rover.")
+'''
+counter=0
+while counter < 3:    
+        send_local_ned_velocity(0.5,-0.5,0)
+        print("Turning to the left (counter clockwise)")
+        time.sleep(2)
+        counter = counter + 1
+'''

@@ -109,19 +109,19 @@ vehicle = connectMyCopter()
 arm()
 
 counter=0
-while counter < 10: #cannot send negative vx local vel
+while counter < 3: #cannot send negative vx local vel
         send_local_ned_velocity(0.5,0,0) 
         print("Moving forward at 0.5 m/s with local NED")
         time.sleep(1)
         counter = counter + 1
-'''
+
 counter=0
-while counter < 1:
+while counter < 3:
         send_local_ned_velocity(0,0.5,0)
         print("Turning to the right (clockwise)")
         time.sleep(2)
         counter = counter + 1
-'''
+
 '''
 counter=0
 while counter < 3:    
