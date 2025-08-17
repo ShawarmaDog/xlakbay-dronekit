@@ -4,6 +4,8 @@ import cv2.aruco as aruco # type: ignore
 import numpy as np
 from imutils.video import WebcamVideoStream
 import imutils
+import csv
+from datetime import datetime
 
 from dronekit import connect, VehicleMode,LocationGlobalRelative,APIException
 import time
@@ -32,6 +34,17 @@ calib_path="/home/bob/xlakbay-dronekit/rover/camera/calibrationFiles/"
 cameraMatrix   = np.loadtxt(calib_path+'cameraMatrix.txt', delimiter=',')
 cameraDistortion   = np.loadtxt(calib_path+'cameraDistortion.txt', delimiter=',')
 
+
+# CSV setup
+csv_filename = "aruco_rover_log_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".csv"
+csv_file = open(csv_filename, mode='w', newline='')
+csv_writer = csv.writer(csv_file)
+csv_writer.writerow(["timestamp", "x", "y", "z", "turn_angle", "speed", "marker_speed"])  # Header
+
+# Marker speed tracking variables
+prev_z = None
+prev_time = None
+marker_detected_last = False
 
 #########FUNCTIONS#################
 
@@ -158,7 +171,7 @@ def get_aruco_coordinates():
         frame_np = np.array(frame)
         gray_img = cv2.cvtColor(frame_np,cv2.COLOR_BGR2GRAY)
         
-        ids=''
+        #ids=''
         corners, ids, rejected = aruco.detectMarkers(image=gray_img,dictionary=aruco_dict,parameters=parameters)
         if ids is not None:
                 print("Found these IDs in the frame:")
@@ -180,62 +193,67 @@ def get_aruco_coordinates():
                 return x,y,z
 
 def park_at_aruco():
+        global prev_z, prev_time, marker_detected_last
         turn_angle_max = 2  # -2 to 2
         speed_max = 0.5  # m/s
-        
+        speed_min = 0    # m/s
+        target_z = 150   # desired distance in cm
+        Kp = 0.005       # proportional gain, tune as needed
         speed = 0
         turn_angle = 0
         turn_angle_sign = 1  # either 1 or -1
-
         P_TURN_GAIN = 0
-
         x, y, z = get_aruco_coordinates()
         x = float(x)
         y = float(y)
         z = float(z)
+        current_time = time.time()
         if x == 0 and y == 0 and z == 0:
-                print("Marker not found. Stopping the rover.")
-                return -1  # Return -1 to indicate marker not found
-
+            marker_speed = 0
+            marker_detected_last = False
+            print("Marker not found. Stopping the rover.")
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            csv_writer.writerow([timestamp, x, y, z, turn_angle, speed, marker_speed])
+            return -1  # Return -1 to indicate marker not found
+        else:
+            if marker_detected_last:
+                dz = z - prev_z
+                dt = current_time - prev_time
+                marker_speed = dz / dt if dt > 0 else 0
+            else:
+                marker_speed = 0  # Ignore spike on reacquisition
+            prev_z = z
+            prev_time = current_time
+            marker_detected_last = True
         xm = x / 100  # change default cm into m
         zm = z / 100
-
         if x > 0: 
                 turn_angle_sign = 1
-                # if the marker is to the right of the rover
-                # positive sign would make the rover turn right as well
         else:
                 turn_angle_sign = -1
-                # negative sign would make the rover turn left
         if z > 500:
                 P_TURN_GAIN = 0.061
-                # if far away we want the rover to be less sensitive in its turning
         if z < 500:
                 P_TURN_GAIN = 0.125
-                # if near we want the rover to be more sensitive in its turning
-
         turn_angle = abs(xm) * P_TURN_GAIN
         if turn_angle > turn_angle_max:
                 turn_angle = turn_angle_max
-
         turn_angle = turn_angle * turn_angle_sign
-        
-        if z > 200:
-                speed = speed_max
-                # farther than 2m, set speed to 0.5m/s
-        elif z > 100 and z < 200:
-                speed = 0.3 
-                # between 1-2m, set speed to 0.3m/s
-        elif z < 100:
+        error = z - target_z
+        speed = Kp * error
+        speed = max(speed_min, min(speed, speed_max))
+        if z < 100:
                 speed = 0
                 print("COULD BE HOME")
                 send_local_ned_velocity(0, 0, 0)
-                # less than 1m, stop the rover
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                csv_writer.writerow([timestamp, x, y, z, turn_angle, speed, marker_speed])
                 return 0  # THIS INDICATES THE ROVER MADE IT
-                   
         velocity_string = "VELOCITY= " + str(speed)
         print(velocity_string)
         send_local_ned_velocity(speed, turn_angle, 0)
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        csv_writer.writerow([timestamp, x, y, z, turn_angle, speed, marker_speed])
         return 1  # Return 1 to indicate normal operation
 ##########MAIN EXECUTABLE###########
 
@@ -296,3 +314,4 @@ except KeyboardInterrupt:
     print("Program interrupted. Stopping the vehicle.")
     send_local_ned_velocity(0, 0, 0)  # Ensure the vehicle stops
     vehicle.armed = False
+    csv_file.close()

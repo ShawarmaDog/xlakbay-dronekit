@@ -20,7 +20,7 @@ cap = WebcamVideoStream(src=0, height=height, width=width).start()
 
 ############ARUCO/CV2############
 id_to_find=72
-marker_size=19 #cm
+marker_size=18.7 #cm
 
 aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_ARUCO_ORIGINAL)
 parameters = aruco.DetectorParameters_create()

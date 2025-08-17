@@ -20,7 +20,7 @@ cap = WebcamVideoStream(src=0, height=height, width=width).start()
 
 ############ARUCO/CV2############
 id_to_find=72
-marker_size=19 #cm
+marker_size=18.7 #cm
 
 aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_ARUCO_ORIGINAL)
 parameters = aruco.DetectorParameters_create()
@@ -246,7 +246,7 @@ arm()
 success_counter = 0
 success_break_point = 5
 marker_not_detected_counter = 0  # Counter for marker not detected
-marker_not_detected_threshold = 20  # Threshold for stopping (1 second = 20 iterations at 0.05s sleep)
+marker_not_detected_threshold = 10  # Threshold for stopping (1 second = 20 iterations at 0.05s sleep)
 
 try:
     while True:
@@ -254,8 +254,8 @@ try:
         if ret == -1:  # Marker not detected
             marker_not_detected_counter += 1
             if marker_not_detected_counter >= marker_not_detected_threshold: 
-                # Has to not detect marker for 1 second (20 * 0.05s)) before stopping
-                print("Marker not detected for 1 second. Stopping and disarming the rover.")
+                # Has to not detect marker for 0.5 second (10 * 0.05s)) before stopping
+                print("Marker not detected for 0.5 second. Stopping and disarming the rover.")
                 send_local_ned_velocity(0, 0, 0)  # Stop the rover
                 vehicle.armed = False  # Disarm for safety
                 print("Waiting for marker detection >100cm away to rearm...")

@@ -171,25 +171,29 @@ try:
             detected_ids = [int(i[0]) for i in ids]
 
         # Print detected IDs every 1 second
-        if time.time() - last_print_time >= 1:
+        if time.time() - last_print_time >= 2.5:
             if detected_ids:
                 print("Detected marker IDs:", detected_ids)
                 if fwd in detected_ids:
                     print("Moving forward")
-                    send_local_ned_velocity(0.5,0,0)
-                if right in detected_ids:
+                    send_local_ned_velocity(0.25, 0, 0)
+                elif right in detected_ids:
                     print("Turning right")
-                    send_local_ned_velocity(0,0.5,0)
-                if left in detected_ids:
+                    send_local_ned_velocity(0, 0.25, 0)
+                elif left in detected_ids:
                     print("Turning left")
-                    send_local_ned_velocity(0,-0.5,0)
+                    send_local_ned_velocity(0, -0.25, 0)
+                else:
+                    print("No movement command detected, stopping.")
+                    #send_local_ned_velocity(0, 0, 0)
             else:
                 print("No markers detected.")
+                #send_local_ned_velocity(0, 0, 0)
             print("")
             last_print_time = time.time()
 
 except KeyboardInterrupt:
     print("Program interrupted. Stopping the vehicle.")
-    send_local_ned_velocity(0, 0, 0)  # Ensure the vehicle stops
+    #send_local_ned_velocity(0, 0, 0)  # Ensure the vehicle stops
     vehicle.armed = False
 
